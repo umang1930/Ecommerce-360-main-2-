@@ -1,12 +1,3 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-
-const inputSchema = z.object({
-  createdAfter: z.string().datetime({ offset: true }),
-  createdBefore: z.string().datetime({ offset: true }),
-  seller: z.enum(["claspo", "monkeyman"]).optional(),
-});
-
 export interface AmazonOrderItem {
   orderId: string;
   orderItemId: string;
@@ -389,9 +380,7 @@ async function listOrders(
 }
 
 /** Server-only: SP-API credentials never cross into the browser or Capacitor bundle. */
-export const fetchAmazonOrders = createServerFn({ method: "POST" })
-  .validator(inputSchema)
-  .handler(async ({ data }): Promise<AmazonOrdersResult> => {
+export async function fetchAmazonOrders({ data }: { data: { createdAfter: string; createdBefore: string; seller?: "claspo" | "monkeyman" } }): Promise<AmazonOrdersResult> {
     try {
       const seller = data.seller ?? "claspo";
       const config = getConfig(seller);
@@ -407,4 +396,4 @@ export const fetchAmazonOrders = createServerFn({ method: "POST" })
         message: error instanceof Error ? error.message : "Amazon Orders request failed.",
       };
     }
-  });
+}
